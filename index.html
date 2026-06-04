@@ -277,6 +277,7 @@
         <button class="tab active" role="tab" aria-selected="true"  onclick="showTab('variance')" id="tab-btn-variance">Monthly Table</button>
         <button class="tab"        role="tab" aria-selected="false" onclick="showTab('trends')"  id="tab-btn-trends">Revenue Trends</button>
         <button class="tab"        role="tab" aria-selected="false" onclick="showTab('ebitda')"  id="tab-btn-ebitda">EBITDA Bridge</button>
+        <button class="tab" role="tab" aria-selected="false" onclick="showTab('margins')" id="tab-btn-margins">Margin Trends</button>
       </div>
     </div>
 
@@ -373,7 +374,23 @@
     </div>
   </div>
 </div>
-  <p class="section-title" style="margin-top:1.75rem">Full Year Waterfall</p>
+  <div id="panel-margins" role="tabpanel" aria-labelledby="tab-btn-margins" style="display:none">
+      <div class="card-body">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch" style="background:#B5D4F4"></span>GP% Budget</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#378ADD"></span>GP% Actual</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#9FE1CB"></span>EBITDA% Budget</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#1D9E75"></span>EBITDA% Actual</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="margins-chart" role="img" aria-label="Line chart showing gross margin % and EBITDA margin % budget vs actual for 2025.">Gross margin % and EBITDA margin % budget vs actual, Jan–Dec 2025.</canvas>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:var(--radius);font-size:12px;color:var(--muted);line-height:1.7;">
+          <strong style="color:var(--text)">Margin insight:</strong> Gross margin held steady near 41% throughout the year, confirming stable pricing power and cost discipline on the V3 platform. EBITDA margin fluctuated between 18–26%, driven primarily by OpEx timing — notably the Q3 engineering hire cohort and the Q4 customer inventory correction period.
+        </div>
+      </div>
+    </div>
+<p class="section-title" style="margin-top:1.75rem">Full Year Waterfall</p>
   <div class="card">
     <div class="card-body">
       <div class="chart-container" style="height:200px">
@@ -568,8 +585,8 @@ tbody.innerHTML = D.map(d => `
 /* ════════════════════════════════════════════════════════
    TABS
 ════════════════════════════════════════════════════════ */
-const PANELS = ['variance','trends','ebitda'];
-let revChart = null, ebitdaChart = null;
+const PANELS = ['variance','trends','ebitda','margins'];
+let revChart = null, ebitdaChart = null, marginsChart = null;
 
 function showTab(name) {
   PANELS.forEach(id => {
@@ -579,7 +596,7 @@ function showTab(name) {
     btn.setAttribute('aria-selected', id === name ? 'true' : 'false');
   });
   if (name === 'trends'  && !revChart)    buildRevChart();
-  if (name === 'ebitda'  && !ebitdaChart) buildEbitdaChart();
+  if (name === 'ebitda'  && !ebitdaChart) buildEbitdaChart(); if (name === 'margins' && !marginsChart) buildMarginsChart(); if (name === 'margins' && !marginsChart) buildMarginsChart();
 }
 
 /* ════════════════════════════════════════════════════════
@@ -683,6 +700,32 @@ function buildEbitdaChart() {
 }
 
 /* ════════════════════════════════════════════════════════
+   function buildMarginsChart() {
+  const gpBPct = D.map(d => +((d.gpB / d.rb) * 100).toFixed(1));
+  const gpAPct = D.map(d => +((d.gpA / d.ra) * 100).toFixed(1));
+  const eBPct  = D.map(d => +((d.eB  / d.rb) * 100).toFixed(1));
+  const eAPct  = D.map(d => +((d.eA  / d.ra) * 100).toFixed(1));
+  marginsChart = new Chart(document.getElementById('margins-chart'), {
+    type: 'line',
+    data: {
+      labels: D.map(d => d.m),
+      datasets: [
+        { label:'GP% Budget',    data:gpBPct, borderColor:'#B5D4F4', borderWidth:2,   borderDash:[5,3], pointRadius:3, tension:0.3, fill:false },
+        { label:'GP% Actual',    data:gpAPct, borderColor:'#378ADD', borderWidth:2.5, pointRadius:4,    tension:0.3, fill:false },
+        { label:'EBITDA% Budget',data:eBPct,  borderColor:'#9FE1CB', borderWidth:2,   borderDash:[5,3], pointRadius:3, tension:0.3, fill:false },
+        { label:'EBITDA% Actual',data:eAPct,  borderColor:'#1D9E75', borderWidth:2.5, pointRadius:4,    tension:0.3, fill:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        y:{ min:10, max:50, ticks:{ callback: v => v+'%', font:{family:'DM Mono, monospace',size:11} }, grid:{color:'rgba(0,0,0,0.05)'} },
+        x:{ grid:{display:false}, ticks:{autoSkip:false, font:{size:11}} }
+      }
+    }
+  });
+}
    CHART: Full Year Waterfall
 ════════════════════════════════════════════════════════ */
 new Chart(document.getElementById('waterfall-chart'), {
