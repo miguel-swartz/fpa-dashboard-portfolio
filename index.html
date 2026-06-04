@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FP&A Dashboard — Vega Semicinductor</title>
+  <title>FP&A Dashboard — Vega Semiconductor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -242,7 +242,7 @@
   <div class="topnav-left">
     <div class="logo-mark" aria-hidden="true">VSI</div>
     <div>
-      <div class="co-name">Vega Semicinductor</div>
+      <div class="co-name">Vega Semiconductor</div>
       <div class="co-sub">Advanced Logic Solutions — Austin, TX</div>
     </div>
     <span class="nav-badge" aria-label="Portfolio project badge">Portfolio Project</span>
@@ -433,7 +433,7 @@
 
   <!-- ── Footer ── -->
   <footer class="footer">
-    <p>FP&amp;A Dashboard &nbsp;·&nbsp; Vega Semicinductor (Fictional Portfolio Dataset) &nbsp;·&nbsp; FY 2025</p>
+    <p>FP&amp;A Dashboard &nbsp;·&nbsp; Vega Semiconductor (Fictional Portfolio Dataset) &nbsp;·&nbsp; FY 2025</p>
     <p>Built by <strong>Miguel Eduardo Swartz</strong> &nbsp;·&nbsp; BBA Finance, Texas Tech University &nbsp;·&nbsp;
       <a href="https://linkedin.com/in/miguel-swartz" target="_blank" rel="noopener">LinkedIn</a>
       &nbsp;·&nbsp; Powered by Claude AI
@@ -443,9 +443,9 @@
 </main>
 
 <script>
-/* ════════════════════════════════════════════════════════
+
    DATA
-════════════════════════════════════════════════════════ */
+
 const RAW = [
   { m:'Jan', rb:45.0, ra:42.3, cb:26.5, ca:25.8, ob:8.5,  oa:8.9  },
   { m:'Feb', rb:47.0, ra:44.1, cb:27.6, ca:26.4, ob:8.7,  oa:9.1  },
@@ -497,9 +497,9 @@ const fmtvp = v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
 const pcls  = v => v >= 0 ? 'var-pos' : 'var-neg';
 const pill  = (v, txt) => `<span class="pill ${v>=0?'pos':'neg'}">${txt}</span>`;
 
-/* ════════════════════════════════════════════════════════
+
    KPI CARDS
-════════════════════════════════════════════════════════ */
+
 const kpis = [
   {
     label: 'FY Revenue Actual',
@@ -543,9 +543,9 @@ document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
   </div>
 `).join('');
 
-/* ════════════════════════════════════════════════════════
+
    VARIANCE TABLE
-════════════════════════════════════════════════════════ */
+
 const tbody = document.getElementById('var-tbody');
 tbody.innerHTML = D.map(d => `
   <tr>
@@ -583,9 +583,9 @@ tbody.innerHTML = D.map(d => `
   </tr>
 `;
 
-/* ════════════════════════════════════════════════════════
+
    TABS
-════════════════════════════════════════════════════════ */
+
 const PANELS = ['variance','trends','ebitda','margins'];
 let revChart = null, ebitdaChart = null, marginsChart = null;
 
@@ -597,12 +597,12 @@ function showTab(name) {
     btn.setAttribute('aria-selected', id === name ? 'true' : 'false');
   });
   if (name === 'trends'  && !revChart)    buildRevChart();
-  if (name === 'ebitda'  && !ebitdaChart) buildEbitdaChart(); if (name === 'margins' && !marginsChart) buildMarginsChart(); if (name === 'margins' && !marginsChart) buildMarginsChart();
+  if (name === 'ebitda'  && !ebitdaChart) buildEbitdaChart(); if (name === 'margins' && !marginsChart) buildMarginsChart();
 }
 
-/* ════════════════════════════════════════════════════════
+
    CHART: Revenue Trends
-════════════════════════════════════════════════════════ */
+
 function buildRevChart() {
   revChart = new Chart(document.getElementById('rev-chart'), {
     type: 'line',
@@ -651,9 +651,9 @@ function buildRevChart() {
   });
 }
 
-/* ════════════════════════════════════════════════════════
+
    CHART: EBITDA Bridge
-════════════════════════════════════════════════════════ */
+
 function buildEbitdaChart() {
   ebitdaChart = new Chart(document.getElementById('ebitda-chart'), {
     type: 'bar',
@@ -700,7 +700,7 @@ function buildEbitdaChart() {
   });
 }
 
-/* ════════════════════════════════════════════════════════
+
    function buildMarginsChart() {
   const gpBPct = D.map(d => +((d.gpB / d.rb) * 100).toFixed(1));
   const gpAPct = D.map(d => +((d.gpA / d.ra) * 100).toFixed(1));
@@ -727,8 +727,8 @@ function buildEbitdaChart() {
     }
   });
 }
-   CHART: Full Year Waterfall
-════════════════════════════════════════════════════════ */
+
+
 new Chart(document.getElementById('waterfall-chart'), {
   type: 'bar',
   data: {
@@ -770,9 +770,9 @@ new Chart(document.getElementById('waterfall-chart'), {
   }
 });
 
-/* ════════════════════════════════════════════════════════
+
    AI EXECUTIVE SUMMARY
-════════════════════════════════════════════════════════ */
+
 async function generateSummary() {
   const apiKey = document.getElementById('api-key').value.trim();
   const btn    = document.getElementById('gen-btn');
@@ -795,7 +795,7 @@ async function generateSummary() {
     `${d.m}: Rev Budget $${d.rb}M | Actual $${d.ra}M | Var ${d.rv >= 0 ? '+' : ''}$${d.rv}M (${fmtvp(d.rvp)}) | EBITDA Var ${d.ev >= 0 ? '+' : ''}$${d.ev}M`
   ).join('\n');
 
-  const prompt = `You are a senior FP&A analyst preparing a written executive summary for the CFO. Here is the full-year 2025 budget vs actual data for Vega Semicinductor (fictional fabless semiconductor company headquartered in Austin, TX):
+  const prompt = `You are a senior FP&A analyst preparing a written executive summary for the CFO. Here is the full-year 2025 budget vs actual data for Vega Semiconductor (fictional fabless semiconductor company headquartered in Austin, TX):
 
 ${dataStr}
 
