@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vegapunk Semiconductor | FP&A Dashboard FY 2025</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%231A1A1A'/><text x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='11' fill='%23C9A84C'>VPS</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --parchment:  #F5F3EE;
+      --parchment2: #FAFAF8;
+      --surface:    #FFFFFF;
+      --border:     #E0DDD5;
+      --border2:    #CCC9C0;
+      --text:       #1A1A1A;
+      --text2:      #6B6560;
+      --text3:      #9C9590;
+      --gold:       #C9A84C;
+      --gold-dk:    #8B7340;
+      --gold-lt:    #F5EDD8;
+      --gold-mid:   #E5D8A8;
+      --charcoal:   #1A1A1A;
+      --green:      #1A5C2A;
+      --green-lt:   #EBF5EB;
+      --red:        #8B1A1A;
+      --red-lt:     #F5EBEB;
+      --font:       'Plus Jakarta Sans', system-ui, sans-serif;
+      --serif:      'Playfair Display', Georgia, serif;
+      --mono:       'DM Mono', 'Courier New', monospace;
+      --radius:     6px;
+      --shadow:     0 1px 4px rgba(0,0,0,0.06);
+    }
+    body { font-family:var(--font); background:var(--parchment); color:var(--text); min-height:100vh; font-size:14px; line-height:1.6; }
+
+    /* ── NAV ── */
+    .topnav { background:var(--charcoal); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:58px; position:sticky; top:0; z-index:10; gap:12px; }
+    .topnav-left { display:flex; align-items:center; gap:14px; flex-shrink:0; }
+    .logo-mark { width:32px; height:32px; border-radius:4px; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--charcoal); letter-spacing:.02em; flex-shrink:0; }
+    .co-block { display:flex; flex-direction:column; gap:1px; }
+    .co-name { font-family:var(--serif); font-size:15px; color:#FFFFFF; letter-spacing:.01em; }
+    .co-sub  { font-size:10px; color:rgba(255,255,255,0.45); letter-spacing:.04em; text-transform:uppercase; }
+    .nav-divider { width:1px; height:24px; background:rgba(255,255,255,0.12); flex-shrink:0; }
+    .nav-badge { font-size:10px; font-weight:500; padding:3px 10px; border-radius:2px; background:rgba(201,168,76,0.15); color:var(--gold); letter-spacing:.06em; text-transform:uppercase; border:0.5px solid rgba(201,168,76,0.35); }
+    .topnav-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .nav-pill { font-size:11px; padding:4px 12px; border-radius:2px; background:transparent; color:rgba(255,255,255,0.55); border:0.5px solid rgba(255,255,255,0.15); cursor:pointer; letter-spacing:.02em; }
+    .nav-pill:hover { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.8); }
+    .built-by { font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:.02em; }
+
+    /* ── LAYOUT ── */
+    .page { max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem 3rem; }
+    .section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.12em; color:var(--gold-dk); margin-bottom:12px; margin-top:2rem; display:flex; align-items:center; gap:10px; }
+    .section-title::after { content:''; flex:1; height:0.5px; background:var(--border); }
+    .section-title:first-child { margin-top:0; }
+
+    /* ── KPI ── */
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); gap:10px; margin-bottom:1.5rem; }
+    .kpi-card { background:var(--surface); border:0.5px solid var(--border); border-left:3px solid var(--gold); border-radius:var(--radius); padding:1rem 1.15rem; box-shadow:var(--shadow); }
+    .kpi-label { font-size:9.5px; color:var(--text3); font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:.08em; }
+    .kpi-value { font-size:28px; font-weight:600; color:var(--text); font-family:var(--mono); letter-spacing:-.02em; line-height:1; }
+    .kpi-delta { font-size:11px; margin-top:6px; font-weight:500; }
+    .kpi-delta.pos { color:var(--green); }
+    .kpi-delta.neg { color:var(--red); }
+    .kpi-delta.neu { color:var(--text3); }
+
+    /* ── CARD ── */
+    .card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .card-header { padding:.9rem 1.25rem; border-bottom:0.5px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; background:var(--parchment2); }
+    .card-title { font-size:13px; font-weight:600; color:var(--text); letter-spacing:.01em; }
+    .card-body { padding:1.25rem; }
+
+    /* ── TABS ── */
+    .tabs { display:flex; gap:2px; flex-wrap:wrap; }
+    .tab { font-size:11.5px; font-weight:500; padding:5px 14px; border:0.5px solid transparent; border-radius:2px; cursor:pointer; background:transparent; color:var(--text3); transition:all .15s; letter-spacing:.01em; white-space:nowrap; }
+    .tab:hover { background:var(--parchment); color:var(--text2); border-color:var(--border); }
+    .tab.active { background:var(--gold); color:var(--charcoal); border-color:var(--gold); font-weight:600; }
+
+    /* ── TABLE ── */
+    .table-scroll { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    thead th { text-align:right; padding:8px 10px; color:var(--text3); font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.07em; background:var(--parchment); border-bottom:0.5px solid var(--border2); white-space:nowrap; }
+    thead th:first-child { text-align:left; }
+    tbody td { text-align:right; padding:7px 10px; border-bottom:0.5px solid var(--border); font-family:var(--mono); font-size:11.5px; color:var(--text); }
+    tbody td:first-child { text-align:left; font-family:var(--font); font-weight:500; color:var(--text2); font-size:12px; }
+    tbody tr:hover td { background:var(--parchment); }
+    tbody tr.total-row td { font-weight:600; background:var(--parchment); border-top:1px solid var(--border2); border-bottom:none; }
+    .var-pos { color:var(--green); }
+    .var-neg { color:var(--red); }
+    .pill { display:inline-block; padding:2px 8px; border-radius:2px; font-size:10.5px; font-weight:600; }
+    .pill.pos { background:var(--green-lt); color:var(--green); }
+    .pill.neg { background:var(--red-lt); color:var(--red); }
+
+    /* ── CHARTS ── */
+    .chart-container { position:relative; width:100%; height:280px; }
+    .legend { display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px; }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text2); }
+    .legend-swatch { width:12px; height:3px; border-radius:2px; flex-shrink:0; }
+    .legend-swatch.square { height:12px; border-radius:2px; }
+    .insight-box { margin-top:14px; padding:12px 16px; background:var(--parchment); border-left:3px solid var(--gold); font-size:12px; color:var(--text2); line-height:1.75; border-radius:0 var(--radius) var(--radius) 0; }
+
+    /* ── COMMENTARY ── */
+    .commentary-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+    .commentary-cell { padding:1.15rem 1.25rem; }
+    .commentary-cell.br { border-right:0.5px solid var(--border); }
+    .commentary-cell.bb { border-bottom:0.5px solid var(--border); }
+    .commentary-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:4px; }
+    .commentary-title { font-size:12.5px; font-weight:600; color:var(--text); }
+    .commentary-pill { font-size:10px; padding:2px 9px; border-radius:2px; font-weight:600; }
+    .commentary-pill.pos { background:var(--green-lt); color:var(--green); }
+    .commentary-pill.neg { background:var(--red-lt); color:var(--red); }
+    .commentary-text { font-size:12px; color:var(--text2); line-height:1.75; }
+
+    /* ── FORECAST ── */
+    .forecast-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:1.25rem; }
+    .forecast-card { background:var(--gold-lt); border:0.5px solid var(--gold-mid); border-radius:var(--radius); padding:12px 14px; }
+    .forecast-label { font-size:9.5px; color:var(--gold-dk); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+    .forecast-value { font-size:24px; font-weight:600; color:var(--text); font-family:var(--mono); letter-spacing:-.02em; line-height:1; }
+    .forecast-sub { font-size:10.5px; color:var(--gold-dk); margin-top:5px; font-weight:500; }
+    .assumptions-box { background:var(--parchment); border-left:3px solid var(--gold); padding:12px 16px; font-size:12px; color:var(--text2); line-height:1.75; margin-top:1rem; border-radius:0 var(--radius) var(--radius) 0; }
+
+    /* ── AI ── */
+    .ai-input-row { display:flex; gap:8px; align-items:center; padding:10px 1.25rem; background:var(--gold-lt); border-bottom:0.5px solid var(--gold-mid); }
+    .ai-input-label { font-size:10.5px; color:var(--gold-dk); font-weight:600; white-space:nowrap; text-transform:uppercase; letter-spacing:.05em; }
+    .ai-key-input { flex:1; font-family:var(--mono); font-size:12px; padding:5px 10px; border:0.5px solid var(--border2); border-radius:var(--radius); background:#fff; color:var(--text); min-width:0; }
+    .ai-key-input:focus { outline:none; border-color:var(--gold); }
+    .ai-generate-btn { font-family:var(--font); font-size:11.5px; font-weight:600; padding:6px 18px; border-radius:var(--radius); background:var(--charcoal); color:#fff; border:none; cursor:pointer; white-space:nowrap; letter-spacing:.02em; }
+    .ai-generate-btn:hover { background:#333; }
+    .ai-generate-btn:disabled { opacity:.5; cursor:not-allowed; }
+    .ai-output-area { padding:1.25rem; min-height:80px; }
+    .ai-placeholder { font-size:12.5px; color:var(--text3); font-style:italic; line-height:1.7; }
+    .ai-text { font-size:13px; line-height:1.85; color:var(--text); white-space:pre-wrap; }
+    .ai-section-head { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--gold-dk); margin-top:1.25rem; margin-bottom:5px; padding-bottom:4px; border-bottom:0.5px solid var(--border); }
+    .ai-section-head:first-child { margin-top:0; }
+    .ai-error { font-size:12.5px; color:var(--red); }
+
+    /* ── FOOTER ── */
+    .footer { margin-top:3rem; padding-top:1.5rem; border-top:0.5px solid var(--border); text-align:center; font-size:11px; color:var(--text3); line-height:1.9; }
+    .footer a { color:var(--gold-dk); text-decoration:none; }
+    .footer a:hover { color:var(--gold); }
+    .footer-mark { display:inline-block; width:12px; height:12px; background:var(--gold); border-radius:2px; vertical-align:middle; margin-right:4px; font-size:6px; font-weight:700; color:var(--charcoal); line-height:12px; text-align:center; }
+
+    /* ── PRINT ── */
+    @media print {
+      .topnav { -webkit-print-color-adjust:exact; print-color-adjust:exact; position:relative; }
+      #overview-bar, .ai-section, .nav-pill { display:none !important; }
+      .card { break-inside:avoid; box-shadow:none; }
+      .chart-container { height:180px !important; }
+    }
+    @media (max-width:580px) {
+      .topnav { padding:0 1rem; }
+      .page { padding:1.25rem 1rem 2rem; }
+      .kpi-value { font-size:22px; }
+      .forecast-grid { grid-template-columns:1fr; }
+      .commentary-grid { grid-template-columns:1fr; }
+      .commentary-cell.br { border-right:none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="logo-mark">VPS</div>
+    <div class="co-block">
+      <div class="co-name">Vegapunk Semiconductor</div>
+      <div class="co-sub">Advanced Logic Solutions &nbsp;·&nbsp; Austin, TX</div>
+    </div>
+    <div class="nav-divider"></div>
+    <span class="nav-badge">Portfolio Project</span>
+  </div>
+  <div class="topnav-right">
+    <span class="nav-pill">FY 2025 &nbsp;·&nbsp; Full Year</span>
+    <button class="nav-pill" onclick="window.print()">&#9113; Print</button>
+    <span class="built-by">Built by Miguel Swartz &nbsp;·&nbsp; Claude AI</span>
+  </div>
+</nav>
+
+<div id="overview-bar" style="background:var(--gold-lt);border-bottom:0.5px solid var(--gold-mid);padding:11px 2rem;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+  <div style="display:flex;align-items:flex-start;gap:10px;flex:1;">
+    <span style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--gold-dk);white-space:nowrap;margin-top:3px;padding-top:1px">About</span>
+    <p style="font-size:12.5px;color:var(--text2);line-height:1.7;margin:0;"><strong style="color:var(--text)">Vegapunk Semiconductor, Inc.</strong> is a fabless logic chip design company headquartered in Austin, TX, supplying embedded controllers to automotive and industrial clients across North America. Founded in 2018, Vegapunk operates on a direct-to-OEM sales model with a 12–18 month design cycle. FY 2025 marked the company's first full year of volume production on its V3 logic controller platform — the primary driver of revenue growth and variance activity throughout the year.</p>
+  </div>
+  <button onclick="document.getElementById('overview-bar').style.display='none'" style="background:none;border:none;font-size:16px;color:var(--gold-dk);cursor:pointer;flex-shrink:0;padding:0 4px;opacity:.7">✕</button>
+</div>
+
+<main class="page">
+
+  <p class="section-title">Key Performance Indicators</p>
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <p class="section-title">Variance Analysis</p>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Budget vs Actual — FY 2025</span>
+      <div class="tabs" role="tablist">
+        <button class="tab active" onclick="showTab('variance')" id="tab-btn-variance">Monthly Table</button>
+        <button class="tab" onclick="showTab('trends')"  id="tab-btn-trends">Revenue Trends</button>
+        <button class="tab" onclick="showTab('ebitda')"  id="tab-btn-ebitda">EBITDA Bridge</button>
+        <button class="tab" onclick="showTab('margins')" id="tab-btn-margins">Margin Trends</button>
+        <button class="tab" onclick="showTab('ytd')"     id="tab-btn-ytd">YTD Cumulative</button>
+      </div>
+    </div>
+
+    <div id="panel-variance">
+      <div class="table-scroll">
+        <table><thead><tr>
+          <th style="text-align:left">Month</th>
+          <th>Rev Budget</th><th>Rev Actual</th><th>Var $</th><th>Var %</th>
+          <th>COGS Bud</th><th>COGS Act</th><th>GP Budget</th><th>GP Actual</th>
+          <th>OpEx Bud</th><th>OpEx Act</th><th>EBITDA Bud</th><th>EBITDA Act</th><th>EBITDA Var</th>
+        </tr></thead><tbody id="var-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="panel-trends" style="display:none">
+      <div class="card-body">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--gold);opacity:.5;border:1px dashed var(--gold-dk)"></span>Revenue Budget</span>
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--charcoal)"></span>Revenue Actual</span>
+        </div>
+        <div class="chart-container"><canvas id="rev-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div id="panel-ebitda" style="display:none">
+      <div class="card-body">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--gold-mid)"></span>EBITDA Budget</span>
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--gold)"></span>EBITDA Actual</span>
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--green);opacity:.8"></span>Favorable Var</span>
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--red);opacity:.8"></span>Unfavorable Var</span>
+        </div>
+        <div class="chart-container"><canvas id="ebitda-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div id="panel-margins" style="display:none">
+      <div class="card-body">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch" style="background:var(--gold-mid);height:2px;border-top:2px dashed var(--gold-dk)"></span>GP% Budget</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:var(--gold);height:3px"></span>GP% Actual</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:var(--border2);height:2px;border-top:2px dashed var(--text3)"></span>EBITDA% Budget</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:var(--charcoal);height:3px"></span>EBITDA% Actual</span>
+        </div>
+        <div class="chart-container"><canvas id="margins-chart"></canvas></div>
+        <div class="insight-box"><strong style="color:var(--text)">Margin insight:</strong> Gross margin held steady near 41% throughout the year, confirming stable pricing power and cost discipline on the V3 platform. EBITDA margin fluctuated between 18–26%, driven primarily by OpEx timing — notably the Q3 engineering hire cohort and the Q4 customer inventory correction period.</div>
+      </div>
+    </div>
+
+    <div id="panel-ytd" style="display:none">
+      <div class="card-body">
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--gold);opacity:.4;border:1px dashed var(--gold-dk)"></span>Cumulative Budget</span>
+          <span class="legend-item"><span class="legend-swatch square" style="background:var(--charcoal)"></span>Cumulative Actual</span>
+        </div>
+        <div class="chart-container"><canvas id="ytd-chart"></canvas></div>
+        <div class="insight-box"><strong style="color:var(--text)">YTD insight:</strong> The cumulative gap opened at −$4.4M through Q1 as the V3 platform ramped below plan. The gap narrowed through Q2 and Q3 on strong recovery months. By December, full-year actuals closed within +$1.5M of plan — a testament to H2 execution after a difficult start.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:2rem">Management Commentary</p>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Quarterly Variance Analysis — FY 2025</span>
+      <span style="font-size:10.5px;color:var(--text3);letter-spacing:.02em">Prepared by FP&amp;A &nbsp;·&nbsp; Vegapunk Semiconductor</span>
+    </div>
+    <div class="commentary-grid">
+      <div class="commentary-cell br bb">
+        <div class="commentary-head"><span class="commentary-title">Q1 2025 — Jan / Feb / Mar</span><span class="commentary-pill neg">−$4.4M vs plan</span></div>
+        <p class="commentary-text">Revenue missed plan by $4.4M as the V3 logic controller platform ramped slower than projected. Wafer allocation constraints delayed customer shipments in January and February. March partially recovered on expedited orders, but Q1 closed below target on both revenue and EBITDA.</p>
+      </div>
+      <div class="commentary-cell bb">
+        <div class="commentary-head"><span class="commentary-title">Q2 2025 — Apr / May / Jun</span><span class="commentary-pill pos">+$3.8M vs plan</span></div>
+        <p class="commentary-text">Q2 recovered strongly as supply constraints resolved and a major automotive OEM accelerated a June shipment pull-in worth $3.3M above plan. April and May saw continued softness before the pull-in order drove a clean quarterly beat on both revenue and EBITDA margin.</p>
+      </div>
+      <div class="commentary-cell br">
+        <div class="commentary-head"><span class="commentary-title">Q3 2025 — Jul / Aug / Sep</span><span class="commentary-pill pos">+$3.8M vs plan</span></div>
+        <p class="commentary-text">Strong industrial sector demand drove Q3 above plan on revenue. EBITDA lagged budget as OpEx increased from a planned engineering hire cohort onboarding in July. The revenue beat was partially offset by higher personnel costs, compressing margins through the quarter.</p>
+      </div>
+      <div class="commentary-cell">
+        <div class="commentary-head"><span class="commentary-title">Q4 2025 — Oct / Nov / Dec</span><span class="commentary-pill neg">−$1.7M vs plan</span></div>
+        <p class="commentary-text">October and November missed plan as key distribution customers executed inventory corrections ahead of year-end. December recovered sharply with a $3.8M beat driven by the industrial holiday order cycle and a new design win shipment at a Tier-1 automotive client. Full Q4 closed slightly below plan despite the strong December finish.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:2rem">Full Year Waterfall</p>
+  <div class="card">
+    <div class="card-body">
+      <div class="chart-container" style="height:200px"><canvas id="waterfall-chart"></canvas></div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:2rem">Rolling Forecast — Q1 2026</p>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Forward Projections — January through March 2026</span>
+      <span style="font-size:10px;padding:3px 10px;border-radius:2px;background:var(--gold-lt);color:var(--gold-dk);font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:0.5px solid var(--gold-mid)">Forecast</span>
+    </div>
+    <div class="card-body">
+      <div class="forecast-grid">
+        <div class="forecast-card"><div class="forecast-label">January 2026</div><div class="forecast-value">$65.7M</div><div class="forecast-sub">EBITDA $15.6M &nbsp;·&nbsp; Margin 23.7%</div></div>
+        <div class="forecast-card"><div class="forecast-label">February 2026</div><div class="forecast-value">$67.0M</div><div class="forecast-sub">EBITDA $15.9M &nbsp;·&nbsp; Margin 23.7%</div></div>
+        <div class="forecast-card"><div class="forecast-label">March 2026</div><div class="forecast-value">$68.4M</div><div class="forecast-sub">EBITDA $16.3M &nbsp;·&nbsp; Margin 23.8%</div></div>
+      </div>
+      <div class="chart-container" style="height:220px"><canvas id="forecast-chart"></canvas></div>
+      <div class="assumptions-box"><strong style="color:var(--text)">Forecast Methodology &amp; Key Assumptions</strong><br>Base: Q4 2025 average monthly revenue of $64.4M applied as the starting point. Growth rate: 2.0% monthly compounding based on H2 2025 revenue trajectory. EBITDA margin held at 23.8% (Q4 2025 average), reflecting stable OpEx following Q3 hire cohort normalization. Excludes upside from new design wins not yet under contract. This forecast should be revisited at each monthly close with updated actuals.</div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:2rem">AI-Powered Executive Summary</p>
+  <div class="card ai-section">
+    <div class="card-header">
+      <span class="card-title">CFO-Ready Summary &nbsp;·&nbsp; Powered by Claude AI</span>
+    </div>
+    <div class="ai-input-row">
+      <span class="ai-input-label">API Key</span>
+      <input type="password" id="api-key" class="ai-key-input" placeholder="sk-ant-api03-..." />
+      <button class="ai-generate-btn" id="gen-btn" onclick="generateSummary()">Generate Summary</button>
+    </div>
+    <div class="ai-output-area" id="ai-output">
+      <p class="ai-placeholder">Enter your Anthropic API key above and click Generate Summary to produce a structured CFO-ready executive summary. Your key is used only in your browser and is never stored or transmitted anywhere except the Anthropic API.</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p><span class="footer-mark">V</span> FP&amp;A Dashboard &nbsp;·&nbsp; Vegapunk Semiconductor, Inc. (Fictional Portfolio Dataset) &nbsp;·&nbsp; FY 2025</p>
+    <p>Built by <strong>Miguel Eduardo Swartz</strong> &nbsp;·&nbsp; BBA Finance, Texas Tech University &nbsp;·&nbsp; <a href="https://linkedin.com/in/miguel-swartz" target="_blank" rel="noopener">linkedin.com/in/miguel-swartz</a> &nbsp;·&nbsp; Powered by Claude AI</p>
+  </footer>
+
+</main>
+
+<script>
+const RAW = [
+  { m:'Jan', rb:45.0, ra:42.3, cb:26.5, ca:25.8, ob:8.5,  oa:8.9  },
+  { m:'Feb', rb:47.0, ra:44.1, cb:27.6, ca:26.4, ob:8.7,  oa:9.1  },
+  { m:'Mar', rb:49.0, ra:50.2, cb:28.8, ca:29.8, ob:9.0,  oa:8.7  },
+  { m:'Apr', rb:51.0, ra:53.4, cb:30.1, ca:31.5, ob:9.2,  oa:9.0  },
+  { m:'May', rb:53.0, ra:51.1, cb:31.3, ca:30.2, ob:9.5,  oa:9.8  },
+  { m:'Jun', rb:55.0, ra:58.3, cb:32.5, ca:34.6, ob:9.8,  oa:9.4  },
+  { m:'Jul', rb:57.0, ra:56.2, cb:33.6, ca:33.1, ob:10.0, oa:10.3 },
+  { m:'Aug', rb:59.0, ra:61.5, cb:34.8, ca:36.2, ob:10.2, oa:10.0 },
+  { m:'Sep', rb:61.0, ra:63.1, cb:36.0, ca:37.2, ob:10.5, oa:10.2 },
+  { m:'Oct', rb:63.0, ra:60.4, cb:37.2, ca:35.6, ob:10.8, oa:11.3 },
+  { m:'Nov', rb:65.0, ra:62.1, cb:38.3, ca:36.6, ob:11.0, oa:11.5 },
+  { m:'Dec', rb:67.0, ra:70.8, cb:39.5, ca:41.5, ob:11.2, oa:10.8 },
+];
+const D = RAW.map(d => {
+  const gpB=+(d.rb-d.cb).toFixed(2), gpA=+(d.ra-d.ca).toFixed(2);
+  const eB=+(gpB-d.ob).toFixed(2),   eA=+(gpA-d.oa).toFixed(2);
+  const rv=+(d.ra-d.rb).toFixed(2),  rvp=+((rv/d.rb)*100).toFixed(1);
+  const ev=+(eA-eB).toFixed(2),      evp=+((ev/Math.abs(eB))*100).toFixed(1);
+  return {...d,gpB,gpA,eB,eA,rv,rvp,ev,evp};
+});
+const sum=k=>+D.reduce((s,d)=>s+d[k],0).toFixed(2);
+const totRevB=sum('rb'),totRevA=sum('ra'),totCB=sum('cb'),totCA=sum('ca');
+const totOB=sum('ob'),totOA=sum('oa');
+const totGPB=+(totRevB-totCB).toFixed(2),totGPA=+(totRevA-totCA).toFixed(2);
+const totEB=+(totGPB-totOB).toFixed(2),  totEA=+(totGPA-totOA).toFixed(2);
+const totRV=+(totRevA-totRevB).toFixed(2),totRVP=+((totRV/totRevB)*100).toFixed(1);
+const totEV=+(totEA-totEB).toFixed(2);
+const bestM=D.reduce((b,d)=>d.rv>b.rv?d:b,D[0]);
+const worstM=D.reduce((b,d)=>d.rv<b.rv?d:b,D[0]);
+let cB=0,cA=0;
+const YTD=D.map(d=>{cB+=d.rb;cA+=d.ra;return{m:d.m,cB:+cB.toFixed(1),cA:+cA.toFixed(1)};});
+
+const m$=(v,dec=1)=>'$'+Math.abs(v).toFixed(dec)+'M';
+const sgn=v=>v>=0?'+':'−';
+const fmtv=v=>(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(1)+'M';
+const fmtvp=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
+const pcls=v=>v>=0?'var-pos':'var-neg';
+const pill=(v,t)=>`<span class="pill ${v>=0?'pos':'neg'}">${t}</span>`;
+
+const GOLD='#C9A84C', GOLD_LT='rgba(201,168,76,0.35)', COAL='#1A1A1A', COAL_LT='rgba(26,26,26,0.65)';
+const GREEN='#1A5C2A', GREEN_LT='rgba(26,92,42,0.75)', RED='#8B1A1A', RED_LT='rgba(139,26,26,0.75)';
+const CHART_OPTS = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+  scales:{
+    y:{ ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono, monospace',size:11},color:'#9C9590'}, grid:{color:'rgba(0,0,0,0.04)'}, border:{color:'rgba(0,0,0,0.08)'} },
+    x:{ grid:{display:false}, ticks:{autoSkip:false,font:{size:11},color:'#9C9590'}, border:{color:'rgba(0,0,0,0.08)'} }
+  }
+};
+
+document.getElementById('kpi-grid').innerHTML=[
+  {l:'FY Revenue Actual',v:'$'+totRevA.toFixed(0)+'M',d:fmtv(totRV)+' vs plan ('+fmtvp(totRVP)+')',c:totRV>=0?'pos':'neg'},
+  {l:'FY EBITDA Actual', v:'$'+totEA.toFixed(1)+'M', d:fmtv(totEV)+' vs plan',c:totEV>=0?'pos':'neg'},
+  {l:'EBITDA Margin',    v:((totEA/totRevA)*100).toFixed(1)+'%',d:'Budget: '+((totEB/totRevB)*100).toFixed(1)+'%',c:totEA/totRevA>=totEB/totRevB?'pos':'neu'},
+  {l:'Best Month',       v:bestM.m, d:fmtv(bestM.rv)+' vs plan', c:'pos'},
+  {l:'Hardest Month',    v:worstM.m,d:fmtv(worstM.rv)+' vs plan',c:'neg'},
+].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-delta ${k.c}">${k.d}</div></div>`).join('');
+
+document.getElementById('var-tbody').innerHTML=D.map(d=>`<tr>
+  <td>${d.m}</td><td>${m$(d.rb)}</td><td>${m$(d.ra)}</td>
+  <td class="${pcls(d.rv)}">${sgn(d.rv)}${m$(Math.abs(d.rv))}</td><td>${pill(d.rv,fmtvp(d.rvp))}</td>
+  <td>${m$(d.cb)}</td><td>${m$(d.ca)}</td><td>${m$(d.gpB)}</td><td>${m$(d.gpA)}</td>
+  <td>${m$(d.ob)}</td><td>${m$(d.oa)}</td><td>${m$(d.eB)}</td><td>${m$(d.eA)}</td>
+  <td class="${pcls(d.ev)}">${sgn(d.ev)}${m$(Math.abs(d.ev))}</td></tr>`).join('')+
+`<tr class="total-row"><td>FY Total</td><td>${m$(totRevB,0)}</td><td>${m$(totRevA,0)}</td>
+  <td class="${pcls(totRV)}">${sgn(totRV)}${m$(Math.abs(totRV),1)}</td><td>${pill(totRV,fmtvp(totRVP))}</td>
+  <td>${m$(totCB,0)}</td><td>${m$(totCA,0)}</td><td>${m$(totGPB,1)}</td><td>${m$(totGPA,1)}</td>
+  <td>${m$(totOB,1)}</td><td>${m$(totOA,1)}</td><td>${m$(totEB,1)}</td><td>${m$(totEA,1)}</td>
+  <td class="${pcls(totEV)}">${sgn(totEV)}${m$(Math.abs(totEV),1)}</td></tr>`;
+
+const PANELS=['variance','trends','ebitda','margins','ytd'];
+let revChart=null,ebitdaChart=null,marginsChart=null,ytdChart=null;
+function showTab(name){
+  PANELS.forEach(id=>{
+    document.getElementById('panel-'+id).style.display=id===name?'':'none';
+    document.getElementById('tab-btn-'+id).classList.toggle('active',id===name);
+  });
+  if(name==='trends'  && !revChart)     buildRevChart();
+  if(name==='ebitda'  && !ebitdaChart)  buildEbitdaChart();
+  if(name==='margins' && !marginsChart) buildMarginsChart();
+  if(name==='ytd'     && !ytdChart)     buildYTDChart();
+}
+
+function buildRevChart(){
+  revChart=new Chart(document.getElementById('rev-chart'),{type:'line',
+    data:{labels:D.map(d=>d.m),datasets:[
+      {label:'Budget',data:D.map(d=>d.rb),borderColor:GOLD,backgroundColor:'rgba(201,168,76,0.06)',borderWidth:2,borderDash:[6,3],pointRadius:3,tension:0.35,fill:true},
+      {label:'Actual',data:D.map(d=>d.ra),borderColor:COAL,backgroundColor:'rgba(26,26,26,0.04)',borderWidth:2.5,pointRadius:4,tension:0.35,fill:true}
+    ]},options:CHART_OPTS});
+}
+
+function buildEbitdaChart(){
+  ebitdaChart=new Chart(document.getElementById('ebitda-chart'),{type:'bar',
+    data:{labels:D.map(d=>d.m),datasets:[
+      {label:'Budget',data:D.map(d=>d.eB),backgroundColor:'rgba(201,168,76,0.3)',borderColor:GOLD,borderWidth:1},
+      {label:'Actual', data:D.map(d=>d.eA),backgroundColor:GOLD_LT,borderColor:'#B8962E',borderWidth:1},
+      {label:'Var',    data:D.map(d=>d.ev),backgroundColor:D.map(d=>d.ev>=0?GREEN_LT:RED_LT),borderWidth:0}
+    ]},options:CHART_OPTS});
+}
+
+function buildMarginsChart(){
+  const gpBP=D.map(d=>+((d.gpB/d.rb)*100).toFixed(1));
+  const gpAP=D.map(d=>+((d.gpA/d.ra)*100).toFixed(1));
+  const eBP =D.map(d=>+((d.eB /d.rb)*100).toFixed(1));
+  const eAP =D.map(d=>+((d.eA /d.ra)*100).toFixed(1));
+  const O={...CHART_OPTS,scales:{...CHART_OPTS.scales,y:{...CHART_OPTS.scales.y,min:10,max:50,ticks:{callback:v=>v+'%',font:{family:'DM Mono, monospace',size:11},color:'#9C9590'}}}};
+  marginsChart=new Chart(document.getElementById('margins-chart'),{type:'line',
+    data:{labels:D.map(d=>d.m),datasets:[
+      {label:'GP% Bud', data:gpBP,borderColor:GOLD,borderWidth:1.5,borderDash:[5,3],pointRadius:2,tension:0.3,fill:false},
+      {label:'GP% Act', data:gpAP,borderColor:COAL,borderWidth:2.5,pointRadius:4,tension:0.3,fill:false},
+      {label:'EB% Bud', data:eBP, borderColor:'#CCC9C0',borderWidth:1.5,borderDash:[5,3],pointRadius:2,tension:0.3,fill:false},
+      {label:'EB% Act', data:eAP, borderColor:'#6B6560',borderWidth:2,pointRadius:3,tension:0.3,fill:false},
+    ]},options:O});
+}
+
+function buildYTDChart(){
+  ytdChart=new Chart(document.getElementById('ytd-chart'),{type:'line',
+    data:{labels:YTD.map(d=>d.m),datasets:[
+      {label:'Cum Budget',data:YTD.map(d=>d.cB),borderColor:GOLD,backgroundColor:'rgba(201,168,76,0.07)',borderWidth:2,borderDash:[6,3],pointRadius:3,tension:0.4,fill:true},
+      {label:'Cum Actual', data:YTD.map(d=>d.cA),borderColor:COAL,backgroundColor:'rgba(26,26,26,0.04)',borderWidth:2.5,pointRadius:4,tension:0.4,fill:true}
+    ]},options:{...CHART_OPTS,scales:{...CHART_OPTS.scales,y:{...CHART_OPTS.scales.y,ticks:{callback:v=>'$'+v+'M',font:{family:'DM Mono, monospace',size:11},color:'#9C9590'}}}}});
+}
+
+new Chart(document.getElementById('waterfall-chart'),{type:'bar',
+  data:{labels:['Revenue','COGS','Gross Profit','OpEx','EBITDA'],
+    datasets:[
+      {label:'Budget',data:[totRevB,totCB,totGPB,totOB,totEB],backgroundColor:'rgba(201,168,76,0.3)',borderColor:GOLD,borderWidth:1.5},
+      {label:'Actual', data:[totRevA,totCA,totGPA,totOA,totEA],
+        backgroundColor:['rgba(26,92,42,0.7)','rgba(139,26,26,0.7)','rgba(26,92,42,0.7)','rgba(139,26,26,0.7)','rgba(26,92,42,0.7)'],
+        borderColor:[GREEN,RED,GREEN,RED,GREEN],borderWidth:1.5}
+    ]},
+  options:{...CHART_OPTS,plugins:{legend:{display:true,position:'top',labels:{font:{size:11},usePointStyle:true,pointStyle:'rect',color:'#6B6560'}}}}
+});
+
+new Chart(document.getElementById('forecast-chart'),{type:'bar',
+  data:{labels:['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26'],
+    datasets:[
+      {label:'2025 Actuals',     data:[60.4,62.1,70.8,null,null,null],backgroundColor:'rgba(26,26,26,0.65)',borderColor:COAL,borderWidth:1.5},
+      {label:'Q1 2026 Forecast', data:[null,null,null,65.7,67.0,68.4],backgroundColor:'rgba(201,168,76,0.4)',borderColor:GOLD,borderWidth:1.5}
+    ]},
+  options:{...CHART_OPTS,plugins:{legend:{display:true,position:'top',labels:{font:{size:11},usePointStyle:true,pointStyle:'rect',color:'#6B6560'}}}}
+});
+
+async function generateSummary(){
+  const apiKey=document.getElementById('api-key').value.trim();
+  const btn=document.getElementById('gen-btn'), out=document.getElementById('ai-output');
+  if(!apiKey){out.innerHTML='<p class="ai-error">Please enter your Anthropic API key.</p>';return;}
+  if(!apiKey.startsWith('sk-ant-')){out.innerHTML='<p class="ai-error">Key should start with "sk-ant-".</p>';return;}
+  btn.disabled=true; btn.textContent='Analyzing…';
+  out.innerHTML='<p class="ai-placeholder">Claude is reviewing the variance data and drafting your executive summary…</p>';
+  const dataStr=D.map(d=>`${d.m}: Rev Budget $${d.rb}M | Actual $${d.ra}M | Var ${d.rv>=0?'+':''}$${d.rv}M (${fmtvp(d.rvp)}) | EBITDA Var ${d.ev>=0?'+':''}$${d.ev}M`).join('\n');
+  const prompt=`You are a senior FP&A analyst preparing a written executive summary for the CFO. Here is the full-year 2025 budget vs actual data for Vegapunk Semiconductor, Inc. (fictional fabless semiconductor company headquartered in Austin, TX):\n\n${dataStr}\n\nFull Year Totals:\n- Revenue: Budget $${totRevB.toFixed(0)}M | Actual $${totRevA.toFixed(0)}M | Variance ${fmtv(totRV)} (${fmtvp(totRVP)})\n- Gross Profit: Budget $${totGPB.toFixed(1)}M | Actual $${totGPA.toFixed(1)}M\n- EBITDA: Budget $${totEB.toFixed(1)}M | Actual $${totEA.toFixed(1)}M | Variance ${fmtv(totEV)}\n- EBITDA Margin: Budget ${((totEB/totRevB)*100).toFixed(1)}% | Actual ${((totEA/totRevA)*100).toFixed(1)}%\n\nWrite a structured CFO-ready executive summary with exactly these four labeled sections. Each label on its own line in ALL CAPS:\n\nPERFORMANCE SUMMARY\n[paragraph]\n\nKEY DRIVERS\n[paragraph]\n\nRISK FLAGS\n[paragraph]\n\nFY 2026 RECOMMENDATION\n[paragraph]\n\nUse exact dollar figures. Confident professional prose. No bullet points.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+    const json=await res.json();
+    const raw=json.content?.find(b=>b.type==='text')?.text||'No response generated.';
+    let html=raw;
+    ['PERFORMANCE SUMMARY','KEY DRIVERS','RISK FLAGS','FY 2026 RECOMMENDATION'].forEach(s=>{
+      html=html.replace(s,`<div class="ai-section-head">${s}</div>`);
+    });
+    out.innerHTML=`<div class="ai-text">${html}</div>`;
+  }catch(e){out.innerHTML=`<p class="ai-error">Error: ${e.message}. Check your API key and try again.</p>`;}
+  btn.disabled=false; btn.textContent='Regenerate Summary';
+}
+</script>
+</body>
+</html>
